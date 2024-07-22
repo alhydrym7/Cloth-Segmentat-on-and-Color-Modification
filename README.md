@@ -72,10 +72,7 @@ streamlit run app.py
 ## Contributing
 Contributions are welcome! Please open an issue or submit a pull request for any improvements or bug fixes.
 
-## License
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
 
 ## Acknowledgments
 - The U2Net and Unet models used in this project are credited to their respective authors and repositories.
 - Special thanks to the developers of Streamlit for providing an easy-to-use framework for building web applications in Python.
-```
