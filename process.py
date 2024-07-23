@@ -1,6 +1,4 @@
 
-
-
 from network import U2NET
 import os
 from PIL import Image
@@ -158,7 +156,7 @@ def generate_mask(input_image, net, palette, device='cpu'):
     cloth_seg = cloth_seg.resize(img_size, Image.BICUBIC)
     cloth_seg.save(os.path.join(cloth_seg_out_dir, 'final_seg.png'))
 
-    return cloth_seg, output_arr, color_regions, average_colors
+    return cloth_seg, output_arr, color_regions, average_colors, classes_to_save
 
 def load_seg_model(checkpoint_path, device='cpu'):
     net = U2NET(in_ch=3, out_ch=4)
