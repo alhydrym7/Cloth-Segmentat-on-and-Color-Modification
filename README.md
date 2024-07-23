@@ -74,5 +74,5 @@ Contributions are welcome! Please open an issue or submit a pull request for any
 
 
 ## Acknowledgments
-- The U2Net and Unet models used in this project are credited to their respective authors and repositories.
+- The U2Net and Unet models used in this project are credited to their respective authors and repositories. For more information about U2Net, visit [this link](https://github.com/levindabhi/cloth-segmentation?tab=readme-ov-file).
 - Special thanks to the developers of Streamlit for providing an easy-to-use framework for building web applications in Python.
