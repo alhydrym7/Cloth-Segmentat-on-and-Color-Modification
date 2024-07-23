@@ -75,7 +75,7 @@ elif page == "U2Net Segmentation":
         text_placeholder.text("Generating mask and segmentations...")
 
         # Generate mask and segmentations
-        cloth_seg, output_arr, color_regions, average_colors, len_classes = generate_mask(image, net=model, palette=palette, device=device)
+        cloth_seg, output_arr, color_regions, average_colors, classes_to_save = generate_mask(image, net=model, palette=palette, device=device)
 
         # Find a suitable color palette
         target_colors = [average_colors[cls] for cls in sorted(average_colors.keys())]
@@ -89,22 +89,33 @@ elif page == "U2Net Segmentation":
 
         user_selected_colors = {}
 
+        len_classes = len(classes_to_save)
         for cls, avg_color in average_colors.items():
             mask_image_path = f'output/alpha/{cls}.png'
-            if len(len_classes)==1:
-                cls = len_classes
             alpha_mask_img = Image.open(mask_image_path)
             alpha_mask_img.thumbnail((50, 50))  # Resize for thumbnail display
             col1, col2, col3 = st.columns([1, 2, 2])
-            with col1:
-                st.image(alpha_mask_img, caption=f"Class {cls}", width=50)
-            with col2:
-                hex_color = rgb_to_hex(avg_color)
-                user_color = st.color_picker(f"Choose color for Class {cls}", hex_color)
-                user_selected_colors[cls] = {'color': hex_to_rgb(user_color)}
-            with col3:
-                transparency = st.slider(f"Transparency for Class {cls}", 0, 100, 50)
-                user_selected_colors[cls]['transparency'] = transparency / 100.0  # Normalize to [0, 1]
+
+            if len_classes == 1:
+                with col1:
+                    st.image(alpha_mask_img, caption=f"Class {len_classes}", width=50)
+                with col2:
+                    hex_color = rgb_to_hex(avg_color)
+                    user_color = st.color_picker(f"Choose color for Class {len_classes}", hex_color)
+                    user_selected_colors[cls] = {'color': hex_to_rgb(user_color)}
+                with col3:
+                    transparency = st.slider(f"Transparency for Class {len_classes}", 0, 100, 50)
+                    user_selected_colors[cls]['transparency'] = transparency / 100.0  # Normalize to [0, 1]
+            else:
+                with col1:
+                    st.image(alpha_mask_img, caption=f"Class {cls}", width=50)
+                with col2:
+                    hex_color = rgb_to_hex(avg_color)
+                    user_color = st.color_picker(f"Choose color for Class {cls}", hex_color)
+                    user_selected_colors[cls] = {'color': hex_to_rgb(user_color)}
+                with col3:
+                    transparency = st.slider(f"Transparency for Class {cls}", 0, 100, 50)
+                    user_selected_colors[cls]['transparency'] = transparency / 100.0  # Normalize to [0, 1]
 
         # Update the image with user-selected colors
         def apply_user_colors(image, output_arr, user_selected_colors):
@@ -155,7 +166,7 @@ elif page == "U2Net Segmentation":
         suggested_images = []
         class_colors = list(user_selected_colors.keys())
 
-        if len(len_classes) > 1:
+        if len(classes_to_save) > 1:
             for i, base_color in enumerate(suitable_palette):
                 for j, swap_color in enumerate(suitable_palette):
                     if i != j:
