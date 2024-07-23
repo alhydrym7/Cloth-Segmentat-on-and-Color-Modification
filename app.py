@@ -27,6 +27,7 @@ st.sidebar.write("")
 st.sidebar.write("")
 st.sidebar.write("")
 st.sidebar.write("")
+
 # Sidebar options
 st.sidebar.title("Options")
 
@@ -74,7 +75,7 @@ elif page == "U2Net Segmentation":
         text_placeholder.text("Generating mask and segmentations...")
 
         # Generate mask and segmentations
-        cloth_seg, output_arr, color_regions, average_colors = generate_mask(image, net=model, palette=palette, device=device)
+        cloth_seg, output_arr, color_regions, average_colors, len_classes = generate_mask(image, net=model, palette=palette, device=device)
 
         # Find a suitable color palette
         target_colors = [average_colors[cls] for cls in sorted(average_colors.keys())]
@@ -90,6 +91,8 @@ elif page == "U2Net Segmentation":
 
         for cls, avg_color in average_colors.items():
             mask_image_path = f'output/alpha/{cls}.png'
+            if len(len_classes)==1:
+                cls = len_classes
             alpha_mask_img = Image.open(mask_image_path)
             alpha_mask_img.thumbnail((50, 50))  # Resize for thumbnail display
             col1, col2, col3 = st.columns([1, 2, 2])
@@ -149,9 +152,10 @@ elif page == "U2Net Segmentation":
 
         # Generate and display suggested images based on Suitable Color Palette
         st.write("## Suggested Images Based on Suitable Color Palette")
-        if suitable_palette and len(average_colors) > 1:
-            suggested_images = []
-            class_colors = list(user_selected_colors.keys())
+        suggested_images = []
+        class_colors = list(user_selected_colors.keys())
+
+        if len(len_classes) > 1:
             for i, base_color in enumerate(suitable_palette):
                 for j, swap_color in enumerate(suitable_palette):
                     if i != j:
@@ -160,13 +164,19 @@ elif page == "U2Net Segmentation":
                         temp_colors[class_colors[1]]['color'] = swap_color
                         suggested_image = apply_user_colors(img_np, output_arr, temp_colors)
                         suggested_images.append(suggested_image)
+        else:
+            for color in suitable_palette:
+                temp_colors = user_selected_colors.copy()
+                temp_colors[class_colors[0]]['color'] = color
+                suggested_image = apply_user_colors(img_np, output_arr, temp_colors)
+                suggested_images.append(suggested_image)
 
-            cols = st.columns(3)
-            for idx, img in enumerate(suggested_images):
-                col = cols[idx % 3]
-                with col:
-                    st.image(img, caption=f"Suggested Image {idx + 1}", use_column_width=True)
-                    st.download_button(f"Download Suggested Image {idx + 1}", data=convert_image_to_bytes(img), file_name=f"suggested_image_{idx + 1}.png", mime="image/png")
+        cols = st.columns(3)
+        for idx, img in enumerate(suggested_images):
+            col = cols[idx % 3]
+            with col:
+                st.image(img, caption=f"Suggested Image {idx + 1}", use_column_width=True)
+                st.download_button(f"Download Suggested Image {idx + 1}", data=convert_image_to_bytes(img), file_name=f"suggested_image_{idx + 1}.png", mime="image/png")
 
 elif page == "Unet Segmentation":
     if uploaded_file is not None:
@@ -176,7 +186,6 @@ elif page == "Unet Segmentation":
 
         st.image(uploaded_file, caption="Uploaded Image", use_column_width=True)
         st.write("")
-
 
         # Generate mask and segmentations
         original_image, mask, dst = generate_mask_unet("temp_image.png", device=device)
